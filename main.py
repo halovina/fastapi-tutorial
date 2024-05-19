@@ -1,4 +1,3 @@
-from typing import Union
 
 from fastapi import FastAPI, Depends
 from db_config import get_db
