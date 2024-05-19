@@ -1,18 +1,12 @@
 
-from fastapi import FastAPI, Depends
-from db_config import get_db
-from models import Users
-from sqlalchemy.orm import Session
+from fastapi import FastAPI
+from routers import users
 
 app = FastAPI()
-
+app.include_router(users.router)
 
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/users")
-def get_all_users(db: Session=Depends(get_db)):
-    users = db.query(Users).all()
-    return users
