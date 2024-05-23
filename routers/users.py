@@ -12,9 +12,13 @@ router = APIRouter(
 )
 
 @router.get("/")
-def get_all_users(db: Session=Depends(get_db)):
-    users = db.query(models.Users).all()
-    return users
+def get_all_users(page: int=0, limit: int=10, db: Session=Depends(get_db)):
+    return crud.get_user_by_limit_offset(db, page=page, page_limit=limit)
+
+
+@router.get("/{user_id}")
+def get_all_users(user_id: int, db: Session=Depends(get_db)):
+    return crud.get_user_byid(db, user_id)
 
 
 @router.post("/create-user")

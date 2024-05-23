@@ -18,3 +18,12 @@ def create_new_user(db: Session, user: schemas.CreateUser):
     db.refresh(db_user)
     
     return db_user
+
+
+def get_user_byid(db:Session, user_id: int):
+    return db.query(models.Users).filter(
+        models.Users.id == user_id
+    ).first()
+    
+def get_user_by_limit_offset(db: Session, page: int, page_limit: int):
+    return db.query(models.Users).limit(page_limit).offset(page*page_limit).all()
