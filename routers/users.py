@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile
 from sqlalchemy.orm import Session
 from models.users import models, crud
 from db_config import get_db
 from schema import users as schemas
+from typing import Annotated
 
 
 router = APIRouter(
@@ -27,3 +28,21 @@ def create_new_user(user: schemas.CreateUser, db: Session=Depends(get_db)):
     if db_user:
         raise HTTPException(status_code=400, detail="Email and username already registered")
     return crud.create_new_user(db, user=user)
+
+
+@router.post("/create-user-formdata")
+def create_new_user_with_form_data(username: Annotated[str, Form()], email: Annotated[str, Form()]):
+    return {
+        "username": username,
+        "email": email
+    }
+    
+@router.post("/upload-file")
+def create_profile_image(uploaded_file: UploadFile):
+    file_location = f"files/{uploaded_file.filename}"
+    with open(file_location, "wb+") as file_object:
+        file_object.write(uploaded_file.file.read())
+    
+    return {
+        "info": f"file '{uploaded_file.filename}' save at '{file_location}'"
+    }
