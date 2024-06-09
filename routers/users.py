@@ -4,6 +4,7 @@ from models.users import models, crud
 from db_config import get_db
 from schema import users as schemas
 from typing import Annotated
+import re
 
 
 router = APIRouter(
@@ -11,6 +12,20 @@ router = APIRouter(
     tags=['users'], #tags url
     responses= {404: {'message': 'Not found'}},
 )
+
+def is_valid_email(email):
+    """
+    Checks if the given email is valid.
+
+    Args:
+        email (str): The email address to check.
+
+    Returns:
+        bool: True if the email is valid, False otherwise.
+    """
+
+    email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    return bool(re.match(email_regex, email))
 
 @router.get("/")
 def get_all_users(page: int=0, limit: int=10, db: Session=Depends(get_db)):
@@ -32,6 +47,9 @@ def create_new_user(user: schemas.CreateUser, db: Session=Depends(get_db)):
 
 @router.post("/create-user-formdata")
 def create_new_user_with_form_data(username: Annotated[str, Form()], email: Annotated[str, Form()]):
+    if is_valid_email(email) is False:
+        raise HTTPException(status_code=422, detail="Invalid email")
+    
     return {
         "username": username,
         "email": email
