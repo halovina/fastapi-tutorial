@@ -5,6 +5,8 @@ from db_config import get_db
 from schema import users as schemas
 from typing import Annotated
 import re
+from models.users import sqlm_users
+from schema import scm_sqlmodel
 
 
 router = APIRouter(
@@ -64,3 +66,10 @@ def create_profile_image(uploaded_file: UploadFile):
     return {
         "info": f"file '{uploaded_file.filename}' save at '{file_location}'"
     }
+    
+@router.get("/{user_id}/allitem", response_model=scm_sqlmodel.UserWithAllItem)
+def get_user_with_item(*, session: Session = Depends(get_db), user_id: int):
+    data = session.get(sqlm_users.UsersSQM, user_id)
+    if not data:
+        raise HTTPException(status_code=404, datail="user not found")
+    return data
