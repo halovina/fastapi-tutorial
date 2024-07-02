@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile, responses
 from sqlalchemy.orm import Session
 from models.users import models, crud
 from db_config import get_db
@@ -41,10 +41,17 @@ def get_all_users(user_id: int, db: Session=Depends(get_db)):
 
 @router.post("/create-user")
 def create_new_user(user: schemas.CreateUser, db: Session=Depends(get_db)):
-    db_user = crud.get_user_by_email_username(db, email=user.email, username=user.username)
+    db_user = crud.get_user_by_email_username(db, email=user.email, username=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email and username already registered")
-    return crud.create_new_user(db, user=user)
+    data = crud.create_new_user(db, user)
+    return responses.JSONResponse(content={
+        "message":"success",
+        "data": {
+            "email": data.email,
+            "username": data.username
+        }
+    })
 
 
 @router.post("/create-user-formdata")
@@ -73,3 +80,16 @@ def get_user_with_item(*, session: Session = Depends(get_db), user_id: int):
     if not data:
         raise HTTPException(status_code=404, datail="user not found")
     return data
+
+
+@router.post("/auth/login")
+def user_auth_login(user: schemas.UserLogin, db: Session = Depends(get_db)):
+    if crud.authenticate_user(db, user.email, user.password) is False:
+        return responses.JSONResponse(content={
+            "message": "login gagal"
+        }, status_code=401)
+        
+    return responses.JSONResponse(content={
+            "message": "login success"
+        }, status_code=200)
+        

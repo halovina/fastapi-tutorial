@@ -4,7 +4,7 @@ class UserBase(BaseModel):
     email: str
     
 class CreateUser(UserBase):
-    username: str
+    password: str
     
 class User(UserBase):
     id: int
@@ -12,3 +12,6 @@ class User(UserBase):
     
     class Config:
         orm_mode: True
+        
+class UserLogin(UserBase):
+    password: str
